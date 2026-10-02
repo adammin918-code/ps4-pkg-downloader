@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06132f">
+<meta name="description" content="PS4 PKG Downloader - Web interface for authorized PKG downloads">
+<title>PS4 PKG Downloader</title>
+<style>
+:root{
+  --bg:#040b1d;--panel:#091a3d;--panel2:#06132d;
+  --line:#174b92;--blue:#168cff;--blue2:#55b5ff;
+  --text:#fff;--muted:#9bb9e8;--good:#55e39b;--bad:#ff8585;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -10%,#103b7b 0,#06132f 38%,var(--bg) 75%);color:var(--text);font-family:Arial,"Segoe UI",sans-serif}
+body{min-height:100vh}
+button,input{font:inherit}
+button{cursor:pointer}
+.app{width:min(1100px,100%);margin:auto;padding:22px 18px 34px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:13px}
+.logo{width:54px;height:54px;border-radius:15px;background:linear-gradient(145deg,#159cff,#0757c8);display:grid;place-items:center;font-size:25px;font-weight:900;box-shadow:0 0 32px #168cff44}
+h1{font-size:25px;margin:0}
+.subtitle{font-size:13px;color:var(--muted);margin-top:4px}
+.badge{padding:8px 12px;border:1px solid #2265b5;background:#071b3c;border-radius:999px;color:#a9ccff;font-size:12px}
+.panel{background:linear-gradient(145deg,#0a1d45,#06132d);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 20px 60px #0007}
+label{display:block;color:#c6d9f7;font-size:14px;margin:3px 0 8px}
+input{width:100%;padding:15px 16px;border-radius:11px;border:1px solid #2d5d98;background:#020918;color:#fff;outline:none;direction:ltr;text-align:left}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #168cff18}
+.field{margin-bottom:16px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+button{border:0;border-radius:11px;padding:13px 20px;color:#fff;background:linear-gradient(180deg,#159cff,#0871db);font-weight:800}
+button.secondary{background:#163968;border:1px solid #28568f}
+button.danger{background:#74314a}
+button:disabled{opacity:.45;cursor:not-allowed}
+.info{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+.infoBox{background:#040d20;border:1px solid #123258;border-radius:12px;padding:13px;min-width:0}
+.k{font-size:11px;color:#7998c7}.v{font-size:14px;font-weight:700;margin-top:5px;word-break:break-word}
+.progressWrap{margin-top:20px}
+.progressTop{display:flex;justify-content:space-between;gap:10px;color:#bcd4f8;font-size:13px}
+.track{height:18px;border-radius:999px;background:#13294d;overflow:hidden;margin-top:9px;border:1px solid #1a3c69}
+.fill{height:100%;width:0;background:linear-gradient(90deg,#087cff,#58bdff);transition:width .2s}
+.status{margin-top:15px;padding:13px 15px;border-radius:11px;background:#020918;border:1px solid #102b51;color:#aec7e9;white-space:pre-wrap;line-height:1.5}
+.status.good{color:var(--good)}.status.bad{color:var(--bad)}
+.footer{margin-top:18px;text-align:center;color:#6684ae;font-size:11px;line-height:1.7}
+kbd{background:#10294d;border:1px solid #315a8e;border-radius:5px;padding:2px 6px;color:#d7e8ff}
+@media(max-width:720px){.info{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:460px){.app{padding:15px 12px 25px}.panel{padding:16px}.topbar{align-items:flex-start}.badge{display:none}.actions button{flex:1;min-width:130px}.info{grid-template-columns:1fr 1fr}h1{font-size:21px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">P</div>
+    <div>
+      <h1>PS4 PKG Downloader</h1>
+      <div class="subtitle">واجهة ويب مخصصة لملفات PKG</div>
+    </div>
+  </div>
+  <div class="badge">PKG ONLY</div>
+</header>
+
+<section class="panel">
+  <div class="field">
+    <label for="url">رابط ملف PKG</label>
+    <input id="url" type="url" autocomplete="off" spellcheck="false"
+           placeholder="https://example.com/file.pkg">
+  </div>
+
+  <div class="field">
+    <label for="filename">اسم الملف</label>
+    <input id="filename" autocomplete="off" spellcheck="false"
+           placeholder="download.pkg">
+  </div>
+
+  <div class="actions">
+    <button id="checkBtn">فحص الرابط</button>
+    <button id="downloadBtn" class="secondary" disabled>تنزيل PKG</button>
+    <button id="clearBtn" class="secondary">مسح</button>
+  </div>
+
+  <div class="info">
+    <div class="infoBox"><div class="k">الحالة</div><div id="state" class="v">جاهز</div></div>
+    <div class="infoBox"><div class="k">الحجم</div><div id="size" class="v">غير معروف</div></div>
+    <div class="infoBox"><div class="k">النوع</div><div id="type" class="v">PKG</div></div>
+    <div class="infoBox"><div class="k">النطاق</div><div id="host" class="v">—</div></div>
+  </div>
+
+  <div class="progressWrap">
+    <div class="progressTop">
+      <span id="progressText">0%</span>
+      <span id="speed">—</span>
+    </div>
+    <div class="track"><div id="fill" class="fill"></div></div>
+  </div>
+
+  <div id="status" class="status">
+    ضع رابط PKG مباشر ثم اضغط «فحص الرابط».
+  </div>
+</section>
+
+<div class="footer">
+  هذا الموقع لا يتجاوز CORS أو تسجيل الدخول أو DRM أو حماية السيرفر.
+  استخدمه فقط للملفات التي تملك حق تنزيلها.<br>
+  للتنقل بالكيبورد: <kbd>Tab</kbd> للتحديد و <kbd>Enter</kbd> للتنفيذ.
+</div>
+</main>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+const urlEl = $("url"), nameEl = $("filename");
+const checkBtn = $("checkBtn"), downloadBtn = $("downloadBtn"), clearBtn = $("clearBtn");
+const stateEl = $("state"), sizeEl = $("size"), typeEl = $("type"), hostEl = $("host");
+const statusEl = $("status"), fillEl = $("fill"), progressTextEl = $("progressText"), speedEl = $("speed");
+
+let currentUrl = "";
+
+function formatBytes(bytes){
+  if (!Number.isFinite(bytes) || bytes <= 0) return "غير معروف";
+  const units = ["B","KB","MB","GB","TB"];
+  let i = 0, n = bytes;
+  while(n >= 1024 && i < units.length - 1){ n /= 1024; i++; }
+  return `${n.toFixed(i === 0 ? 0 : 2)} ${units[i]}`;
+}
+
+function setStatus(text, kind=""){
+  statusEl.textContent = text;
+  statusEl.className = "status" + (kind ? " " + kind : "");
+}
+
+function setState(text){
+  stateEl.textContent = text;
+}
+
+function getUrl(){
+  const value = urlEl.value.trim();
+  try{
+    const u = new URL(value);
+    if(u.protocol !== "http:" && u.protocol !== "https:") throw new Error();
+    return u;
+  }catch{
+    setStatus("أدخل رابط HTTP أو HTTPS صحيح.", "bad");
+    return null;
+  }
+}
+
+function looksLikePkg(name, contentType=""){
+  return /\.pkg(?:[?#].*)?$/i.test(name) ||
+         /application\/vnd\.sony\.pkg/i.test(contentType);
+}
+
+function filenameFromUrl(u){
+  const raw = u.pathname.split("/").pop() || "download.pkg";
+  try { return decodeURIComponent(raw); }
+  catch { return raw; }
+}
+
+function filenameFromContentDisposition(value){
+  if(!value) return "";
+  const utf = value.match(/filename\*=UTF-8''([^;]+)/i);
+  if(utf) try { return decodeURIComponent(utf[1].replace(/^"|"$/g,"")); } catch {}
+  const normal = value.match(/filename="?([^";]+)"?/i);
+  return normal ? normal[1] : "";
+}
+
+function reset(){
+  urlEl.value = "";
+  nameEl.value = "";
+  currentUrl = "";
+  setState("جاهز");
+  sizeEl.textContent = "غير معروف";
+  typeEl.textContent = "PKG";
+  hostEl.textContent = "—";
+  fillEl.style.width = "0%";
+  progressTextEl.textContent = "0%";
+  speedEl.textContent = "—";
+  downloadBtn.disabled = true;
+  setStatus("ضع رابط PKG مباشر ثم اضغط «فحص الرابط».");
+}
+
+async function checkLink(){
+  const u = getUrl();
+  if(!u) return;
+
+  currentUrl = u.href;
+  hostEl.textContent = u.hostname;
+  setState("فحص...");
+  sizeEl.textContent = "جارٍ...";
+  downloadBtn.disabled = true;
+  setStatus("جاري فحص الرابط من المتصفح...");
+
+  try{
+    const response = await fetch(u.href, {
+      method: "HEAD",
+      mode: "cors",
+      redirect: "follow",
+      cache: "no-store"
+    });
+
+    if(!response.ok) throw new Error("HTTP " + response.status);
+
+    const contentType = response.headers.get("content-type") || "";
+    const contentLength = Number(response.headers.get("content-length") || 0);
+    const disposition = response.headers.get("content-disposition") || "";
+
+    const serverName = filenameFromContentDisposition(disposition);
+    const guessedName = serverName || filenameFromUrl(u);
+    nameEl.value = guessedName;
+
+    if(!looksLikePkg(guessedName, contentType)){
+      setState("مرفوض");
+      typeEl.textContent = "ليس PKG";
+      setStatus("الرابط لم يظهر كملف PKG. استخدم رابطاً مباشراً لملف PKG.", "bad");
+      return;
+    }
+
+    setState("جاهز");
+    typeEl.textContent = "PKG ✓";
+    sizeEl.textContent = formatBytes(contentLength);
+    downloadBtn.disabled = false;
+
+    const range = response.headers.get("accept-ranges") || "";
+    setStatus(
+      "تم التعرف على الرابط كملف PKG.\n" +
+      (contentLength ? "الحجم: " + formatBytes(contentLength) + "\n" : "") +
+      "Range: " + (range.toLowerCase() === "bytes" ? "مدعوم" : "غير مؤكد") +
+      "\nيمكنك الضغط على «تنزيل PKG»."
+    , "good");
+
+  }catch(error){
+    setState("تعذر الفحص");
+    sizeEl.textContent = "غير معروف";
+    setStatus(
+      "تعذر فحص الرابط من المتصفح.\n\n" +
+      "السبب الشائع: السيرفر لا يسمح بـ CORS أو الرابط يحتاج جلسة/تحويل خاص.\n\n" +
+      error.message
+    , "bad");
+  }
+}
+
+function directDownload(){
+  const u = getUrl();
+  if(!u) return;
+
+  const filename = nameEl.value.trim() || filenameFromUrl(u);
+  if(!/\.pkg$/i.test(filename)){
+    setStatus("اسم الملف يجب أن ينتهي بـ .pkg.", "bad");
+    return;
+  }
+
+  setState("بدء التنزيل...");
+  setStatus(
+    "تم إرسال رابط PKG إلى المتصفح.\n" +
+    "إذا فتح الرابط في صفحة جديدة، استخدم زر التنزيل الذي يوفره السيرفر."
+  );
+
+  const a = document.createElement("a");
+  a.href = currentUrl || u.href;
+  a.download = filename;
+  a.target = "_blank";
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+checkBtn.addEventListener("click", checkLink);
+downloadBtn.addEventListener("click", directDownload);
+clearBtn.addEventListener("click", reset);
+
+urlEl.addEventListener("keydown", e => {
+  if(e.key === "Enter") checkLink();
+});
+nameEl.addEventListener("keydown", e => {
+  if(e.key === "Enter" && !downloadBtn.disabled) directDownload();
+});
+</script>
+</body>
+</html>
